@@ -4,7 +4,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 ORDER_NUMBER, RETURN_DATETIME, PHOTO = range(3)
 
-ADMIN_USERNAME = "T_Kiro"
+ADMIN_USERNAMES = ["T_Kiro", "greaats28", "hermaeus_mora7", "Artemkkkkks"]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет, я Лобач. Скинь мне номер заказа и я все сделаю красиво")
@@ -27,7 +27,7 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Ответ пользователю
     await update.message.reply_text("Заявка отправлена на подтверждение")
 
-    # Отправка админу
+    # Кнопки
     keyboard = [
         [
             InlineKeyboardButton("Подтвердить", callback_data='approve'),
@@ -37,19 +37,22 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     text = (
-        f"Новая заявка:
-"
-        f"Номер заказа: {context.user_data['order_number']}
-"
+        f"Новая заявка:\n"
+        f"Номер заказа: {context.user_data['order_number']}\n"
         f"Дата и время возврата: {context.user_data['return_datetime']}"
     )
 
-    await context.bot.send_photo(
-        chat_id=f"@{ADMIN_USERNAME}",
-        photo=photo,
-        caption=text,
-        reply_markup=reply_markup
-    )
+    # Отправка всем администраторам
+    for admin in ADMIN_USERNAMES:
+        try:
+            await context.bot.send_photo(
+                chat_id=f"@{admin}",
+                photo=photo,
+                caption=text,
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            print(f"Ошибка при отправке админу {admin}: {e}")
 
     return ConversationHandler.END
 
@@ -84,5 +87,5 @@ def main():
 
     app.run_polling()
 
-if __name__ == "__main__":
+if name == "__main__":
     main()
